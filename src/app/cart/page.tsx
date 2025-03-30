@@ -1,11 +1,3 @@
-// import React from "react";
-
-// const CartPage = () => {
-//   return <div>Cart</div>;
-// };
-
-// export default CartPage;
-
 "use client";
 import {
   Box,
@@ -19,172 +11,254 @@ import {
 import Grid from "@mui/material/Grid";
 import React, { useEffect, useState } from "react";
 import RemoveIcon from "@mui/icons-material/Remove";
-// import { IProduct } from "../page";
-// import { useRouter } from "next/navigation";
 import { IProduct } from "@/types/product";
 import { Add } from "@mui/icons-material";
+import { placeOrder } from "@/components/PlaceOrder";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-const CardPage = () => {
+const CartPage = () => {
   const [cartProducts, setCartProducts] = useState<IProduct[]>([]);
   const [productCount, setProductCount] = useState<{ [key: string]: number }>(
     {}
   );
+  const [user, setUser] = useState<string | null>("");
   const [warning, setWarning] = useState<string>("");
+
+  const router = useRouter();
+
+  const handleIncrease = (id: string, product: IProduct) => {
+    if (!user) {
+      toast.warning("Login to add to cart");
+      return;
+    }
+
+    const carts = JSON.parse(localStorage.getItem("carts") || "{}");
+    const userCart = carts[user] || [];
+
+    const cartCounts = JSON.parse(localStorage.getItem("cartCounts") || "{}");
+    const userCounts = cartCounts[user] || {};
+
+    if (userCounts[id] && userCounts[id] + 1 === product.stock) {
+      toast.warning("Maximum stock reached..!");
+    }
+
+    userCounts[id] = (userCounts[id] || 0) + 1;
+    cartCounts[user] = userCounts;
+
+    const productExists = userCart.some((p: IProduct) => p.id === id);
+
+    if (!productExists) {
+      userCart.push(product);
+    }
+    carts[user] = userCart;
+
+    localStorage.setItem("cartCounts", JSON.stringify(cartCounts));
+    localStorage.setItem("carts", JSON.stringify(carts));
+
+    setProductCount(userCounts);
+  };
+
+  const handleDecrease = (id: string) => {
+    if (!user) {
+      toast.warning("Login to remove");
+      return;
+    }
+
+    const carts = JSON.parse(localStorage.getItem("carts") || "{}");
+    const userCart = carts[user] || [];
+
+    const cartCounts = JSON.parse(localStorage.getItem("cartCounts") || "{}");
+    const userCounts = cartCounts[user] || {};
+
+    if (userCounts[id] && userCounts[id] > 1) {
+      userCounts[id] -= 1;
+    } else {
+      delete userCounts[id];
+    }
+    const updatedCart = userCart.filter(
+      (p: IProduct) => p.id !== id || userCounts[id]
+    );
+    carts[user] = updatedCart;
+    cartCounts[user] = userCounts;
+
+    localStorage.setItem("cartCounts", JSON.stringify(cartCounts));
+    localStorage.setItem("carts", JSON.stringify(carts));
+
+    setProductCount({ ...userCounts });
+    setCartProducts([...userCart]);
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedProducts = JSON.parse(
-        localStorage.getItem("cartproducts") || "[]"
-      );
-      const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
+      const activeUser = localStorage.getItem("loggedInUser");
+      setUser(activeUser);
 
-      const updatedProduct = JSON.parse(
-        localStorage.getItem("updatedproduct") || "null"
-      );
-
-      const uniqueProducts: IProduct[] = storedProducts.reduce(
-        (acc: IProduct[], product: IProduct) => {
-          if (!acc.some((p) => p.id === product.id)) {
-            acc.push(product);
-          }
-          return acc;
-        },
-        []
-      );
-
-      setCartProducts(uniqueProducts);
-      setProductCount(storedCart);
-      if (updatedProduct) {
-        const updatedItem = uniqueProducts.find(
-          (p) => p.id === updatedProduct.id
+      if (activeUser) {
+        const carts = JSON.parse(localStorage.getItem("carts") || "{}");
+        const cartCounts = JSON.parse(
+          localStorage.getItem("cartCounts") || "{}"
         );
-        if (updatedItem && updatedItem.price !== updatedProduct.price) {
-          const status =
-            updatedItem.price > updatedProduct.price
-              ? "Increased"
-              : "Decreased";
-          setWarning(
-            `Price ${status} for ${updatedItem.title} from Rs. ${updatedProduct.price} to Rs. ${updatedItem.price}`
-          );
-        }
+
+        const userCart = carts[activeUser] || [];
+        const userCounts = cartCounts[activeUser] || {};
+        setCartProducts(userCart);
+        setProductCount(userCounts);
       }
     }
   }, []);
 
-  const updateLocalStorage = (updatedCart: { [key: number]: number }) => {
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-  };
-  const handleDecrease = (id: string) => {
-    const updatedCart = { ...productCount };
-    if (updatedCart[id] > 1) {
-      updatedCart[id] -= 1;
-    } else {
-      delete updatedCart[id];
-      const updatedProducts = cartProducts.filter(
-        (product) => product.id !== id
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const updatedProduct = JSON.parse(
+        localStorage.getItem("updatedproduct") || "null"
       );
-      setCartProducts(updatedProducts);
-      localStorage.setItem("cartproducts", JSON.stringify(updatedProducts));
+
+      if (updatedProduct) {
+        const existingProduct = cartProducts.find(
+          (p) => p.id === updatedProduct.id
+        );
+
+        if (existingProduct && existingProduct.price !== updatedProduct.price) {
+          const status =
+            existingProduct.price < updatedProduct.price
+              ? "Decreased"
+              : "Increased";
+          setWarning(
+            `Price ${status} for ${existingProduct.title} from Rs. ${updatedProduct.price} to Rs. ${existingProduct.price}`
+          );
+
+          const updatedCart = cartProducts.map((p) =>
+            p.id === updatedProduct.id ? { ...p, updatedProduct } : p
+          );
+
+          setCartProducts(updatedCart);
+
+          if (user) {
+            const carts = JSON.parse(localStorage.getItem("carts") || "{}");
+            carts[user] = updatedCart;
+            localStorage.setItem("carts", JSON.stringify(carts));
+          }
+        }
+      }
     }
-
-    setProductCount(updatedCart);
-    updateLocalStorage(updatedCart);
-  };
-
-  const handleIncrease = (id: string, product: IProduct) => {
-    const updatedCart = { ...productCount, [id]: (productCount[id] || 0) + 1 };
-
-    if (!cartProducts.some((p) => p.id === id)) {
-      setCartProducts((prev) => [...prev, product]);
-      localStorage.setItem(
-        "cartproducts",
-        JSON.stringify([...cartProducts, product])
-      );
-    }
-
-    setProductCount(updatedCart);
-    updateLocalStorage(updatedCart);
-  };
+  }, [user]);
 
   return (
     <>
       <Container maxWidth="lg">
-        {warning && (
-          <Typography color="warning" sx={{ mb: 2 }}>
-            {warning}
-          </Typography>
-        )}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, lg: 8 }}>
-            <Card>
-              <CardContent>
-                {cartProducts.map((product) => (
-                  <Box
-                    key={product.id}
-                    sx={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box>
+          {warning && (
+            <Typography color="warning" sx={{ mb: 2 }}>
+              {warning}
+            </Typography>
+          )}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <Card>
+                <CardContent>
+                  {cartProducts.map((product) => (
+                    <Box
+                      key={product.id}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
                       <Box
-                        component="img"
-                        src={product.image}
-                        width={180}
-                        height={180}
-                        padding={2}
-                        sx={{ objectFit: "cover" }}
-                      />
-                      <Box sx={{ marginLeft: 2 }}>
-                        <Typography>{product.title}</Typography>
-                        <Typography>Rs. {product.price}</Typography>
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={product.image}
+                          width={180}
+                          height={180}
+                          padding={2}
+                          sx={{
+                            objectFit: "cover",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                            },
+                          }}
+                          onClick={() =>
+                            router.push(`/products/${product.id}/edit`)
+                          }
+                        />
+                        <Box sx={{ marginLeft: 2 }}>
+                          <Typography>{product.title}</Typography>
+                          <Typography>Rs. {product.price}</Typography>
+                        </Box>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <Button onClick={() => handleDecrease(product.id)}>
+                            <RemoveIcon />
+                          </Button>
+                          <Typography>
+                            {productCount[product.id] || 0}
+                          </Typography>
+                          <Button
+                            onClick={() => handleIncrease(product.id, product)}
+                            disabled={productCount[product.id] >= product.stock}
+                          >
+                            <Add />
+                          </Button>
+                        </Box>
                       </Box>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Button onClick={() => handleDecrease(product.id)}>
-                        <RemoveIcon />
-                      </Button>
-                      <Typography>{productCount[product.id] || 1}</Typography>
-                      <Button
-                        onClick={() => handleIncrease(product.id, product)}
-                      >
-                        <Add />
-                      </Button>
-                    </Box>
-                  </Box>
-                ))}
-              </CardContent>
-              <CardActions sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button variant="contained" color="warning">
+                  ))}
+                </CardContent>
+                {user && (
+                  <CardActions
+                    sx={{ display: "flex", justifyContent: "flex-end" }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      onClick={placeOrder}
+                    >
+                      Place Order
+                    </Button>
+                  </CardActions>
+                )}
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <Typography>PRICE DETAILS</Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Box>MRP ({Object.keys(productCount).length} items)</Box>
+                <Box>
+                  Rs.
                   {cartProducts.reduce(
-                    (acc, p) => acc + p.price * (productCount[p.id] || 1),
+                    (acc, p) => acc + p.price * (productCount[p.id] || 0),
                     0
                   )}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-          <Grid size={{ xs: 12, lg: 4 }}>
-            <Typography>PRICE DETAILS</Typography>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Box>MRP ({Object.keys(productCount).length} items)</Box>
-              <Box>
-                Rs.
+                </Box>
+              </Box>
+
+              <Typography>
+                Total Amount Rs.
                 {cartProducts.reduce(
-                  (acc, p) => acc + p.price * (productCount[p.id] || 1),
+                  (acc, p) => acc + p.price * (productCount[p.id] || 0),
                   0
                 )}
-              </Box>
-            </Box>
-
-            <Typography>
-              Total Amount Rs.
-              {cartProducts.reduce(
-                (acc, p) => acc + p.price * (productCount[p.id] || 0),
-                0
-              )}
-            </Typography>
+              </Typography>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Container>
     </>
   );
 };
 
-export default CardPage;
+export default CartPage;

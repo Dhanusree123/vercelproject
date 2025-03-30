@@ -12,6 +12,46 @@ const EditProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const param = React.use(params);
 
+  const handleSubmit = (updatedProduct: IProduct) => {
+    const productData = localStorage.getItem("products");
+
+    if (productData) {
+      let products: IProduct[] = JSON.parse(productData);
+      const existingProduct = products.find((p) => p.id === updatedProduct.id);
+
+      if (existingProduct) {
+        localStorage.setItem("updatedproduct", JSON.stringify(existingProduct));
+      }
+
+      products = products.map((p) =>
+        p.id === updatedProduct.id ? updatedProduct : p
+      );
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+    const cartData = localStorage.getItem("carts");
+
+    if (cartData) {
+      const carts = JSON.parse(cartData);
+      //   const activeUser = localStorage.getItem("loggedInUser");
+      //   if (activeUser && carts[activeUser]) {
+      //     let cartProducts: IProduct[] = carts[activeUser];
+      //     cartProducts = cartProducts.map((p) =>
+      //       p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p
+      //     );
+      //     carts[activeUser] = cartProducts;
+      //     localStorage.setItem("carts", JSON.stringify(carts));
+      //   }
+
+      Object.keys(carts).forEach((user) => {
+        carts[user] = carts[user].map((p: IProduct) =>
+          p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p
+        );
+      });
+
+      localStorage.setItem("carts", JSON.stringify(carts));
+    }
+    router.push("/");
+  };
   useEffect(() => {
     const productData = localStorage.getItem("products");
     if (productData) {
@@ -22,45 +62,6 @@ const EditProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
       }
     }
   }, [param.id]);
-
-  const handleSubmit = (updatedProduct: IProduct) => {
-    const productData = localStorage.getItem("products");
-    const cartData = localStorage.getItem("cartproducts");
-
-    if (productData) {
-      let products: IProduct[] = JSON.parse(productData);
-      const existingProduct = products.find((p) => p.id === updatedProduct.id);
-
-      if (existingProduct) {
-        localStorage.setItem("updatedproduct", JSON.stringify(existingProduct));
-      }
-      //   const listofCart = localStorage.getItem("cartproducts");
-      //   if (listofCart) {
-      // let productsinCart: IProduct[] = JSON.parse(listofCart);
-      // productsinCart = productsinCart.map((p) =>
-      //   p.id === updatedProduct.id ? updatedProduct : p
-      // );
-      // localStorage.setItem("cartproducts", JSON.stringify(productsinCart));
-      //   }
-      //   const updatedP = localStorage.getItem('updatedproduct');
-      //   const updatedone = updatedP?JSON.parse(updatedP):[];
-      //   localStorage.setItem('updatedproduct',existingProduct)
-
-      //   console.log("Previous Product Details:", existingProduct);
-      products = products.map((p) =>
-        p.id === updatedProduct.id ? updatedProduct : p
-      );
-      if (cartData) {
-        let cartProducts: IProduct[] = JSON.parse(cartData);
-        cartProducts = cartProducts.map((p) =>
-          p.id === updatedProduct.id ? updatedProduct : p
-        );
-        localStorage.setItem("cartproducts", JSON.stringify(cartProducts));
-      }
-      localStorage.setItem("products", JSON.stringify(products));
-      router.push("/products");
-    }
-  };
 
   if (!product) {
     return <p>Loading...</p>;

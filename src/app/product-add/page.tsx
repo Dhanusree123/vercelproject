@@ -12,7 +12,7 @@ const ProductAddFormPage = () => {
     try {
       const newData = { ...data, id: crypto.randomUUID() };
       localStorage.setItem("products", JSON.stringify([...products, newData]));
-      router.push("/products");
+      router.push("/");
     } catch (e) {
       console.log(e);
     }

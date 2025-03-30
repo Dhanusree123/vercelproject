@@ -5,7 +5,8 @@ export const ProductSchema = z.object({
     title:z.string().min(3,{message:'Title must be at least 3 characters'}),
     image:z.string().url({message:'Image is required'}),
     price:z.coerce.number().gt(0,{message:'Price must be greater than 0'}),
-    stock:z.coerce.number().gte(0,{message:'Stock must be greater than or equal to 0'})
+    stock:z.coerce.number().gte(0,{message:'Stock must be greater than or equal to 0'}),
+    // quantityToCart:z.coerce.number()
 })
 
 export const NewProductSchema = ProductSchema.omit({id:true})
