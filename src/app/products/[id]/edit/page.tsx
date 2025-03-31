@@ -32,15 +32,6 @@ const EditProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
     if (cartData) {
       const carts = JSON.parse(cartData);
-      //   const activeUser = localStorage.getItem("loggedInUser");
-      //   if (activeUser && carts[activeUser]) {
-      //     let cartProducts: IProduct[] = carts[activeUser];
-      //     cartProducts = cartProducts.map((p) =>
-      //       p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p
-      //     );
-      //     carts[activeUser] = cartProducts;
-      //     localStorage.setItem("carts", JSON.stringify(carts));
-      //   }
 
       Object.keys(carts).forEach((user) => {
         carts[user] = carts[user].map((p: IProduct) =>
