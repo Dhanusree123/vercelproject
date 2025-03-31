@@ -45,37 +45,52 @@ const OrdersPage = () => {
               Orders for : <strong>{userEmail}</strong>
             </Typography>
 
-            <Grid container spacing={3}>
-              {orders[userEmail].map((product) => (
-                <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
-                  <Card
-                    sx={{
-                      width: "80vw",
-                      height: "100%",
-                      display: "flex",
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={product.image}
-                      alt={product.title}
-                      sx={{ height: 120, width: 120, objectFit: "contain" }}
-                    />
-                    <CardContent>
-                      <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                        {product.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Price: Rs. {product.price}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Quantity: {orderCounts[userEmail]?.[product.id] || 1}
-                      </Typography>
-                    </CardContent>
-                  </Card>
+            {orders[userEmail].map((order) => (
+              <Box
+                key={order.id}
+                sx={{ mb: 4, p: 2, border: "1px solid #ddd", borderRadius: 2 }}
+              >
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Order ID: <strong>{order.id}</strong>
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {orders[userEmail].map((product) => (
+                    <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
+                      <Card
+                        sx={{
+                          width: "80vw",
+                          height: "100%",
+                          display: "flex",
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={product.image}
+                          alt={product.title}
+                          sx={{ height: 120, width: 120, objectFit: "contain" }}
+                        />
+                        <CardContent>
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: "bold" }}
+                          >
+                            {product.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Price: Rs. {product.price}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Quantity:{" "}
+                            {orderCounts[userEmail]?.[product.id] || 1}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
                 </Grid>
-              ))}
-            </Grid>
+              </Box>
+            ))}
           </Box>
         ))
       )}

@@ -83,6 +83,18 @@ export const placeOrder = () => {
     orders[activeUser] = orders[activeUser] || [];
     orderCounts[activeUser] = orderCounts[activeUser] || {};
 
+    const orderId = crypto.randomUUID();
+
+    const newOrder = {
+        id: orderId,
+        items: userCart.map((product: IProduct) => ({
+            ...product,
+            quantity: userCounts[product.id],
+        })),
+    };
+
+    orders[activeUser].push(newOrder)
+
     userCart.forEach((product: IProduct) => {
         const requestedQuantity = userCounts[product.id];
         orders[activeUser].push(product);
