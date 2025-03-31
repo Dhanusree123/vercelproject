@@ -1,30 +1,4 @@
-// import { Box, Button } from "@mui/material";
-// import Link from "next/link";
-// import React from "react";
-
-// const HomePage = () => {
-//   return (
-//     <Box
-//       sx={{
-//         display: "flex",
-//         justifyContent: "center",
-//         alignItems: "center",
-//         minHeight: "60vh",
-//       }}
-//     >
-//       <Link href={"/products"}>
-//         <Button>PRODUCTS</Button>
-//       </Link>
-
-//       <Link href={"/product-add"}>
-//         <Button>PRODUCT FORM</Button>
-//       </Link>
-//     </Box>
-//   );
-// };
-
-// export default HomePage;
-
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { IProduct } from "@/types/product";
@@ -38,10 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const ProductsPage = () => {
+  const router = useRouter();
+
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productCount, setProductCount] = useState<{ [key: string]: number }>(
     {}
@@ -49,11 +26,6 @@ const ProductsPage = () => {
   const [activeUser, setActiveUser] = useState<string>("");
 
   const handleIncrease = (id: string, product: IProduct) => {
-    if (!activeUser) {
-      toast.warning("Login to add to cart");
-      return;
-    }
-
     const carts = JSON.parse(localStorage.getItem("carts") || "{}");
     const userCart = carts[activeUser] || [];
 
@@ -122,6 +94,9 @@ const ProductsPage = () => {
 
   useEffect(() => {
     const user = localStorage.getItem("loggedInUser") || "";
+    if (!user) {
+      router.push("/login");
+    }
     setActiveUser(user);
   }, []);
 
@@ -138,7 +113,7 @@ const ProductsPage = () => {
         Products
       </Typography>
 
-      {products.length > 0 && (
+      {products.length > 0 ? (
         <Grid container spacing={3}>
           {products.map((product) => (
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
@@ -217,6 +192,15 @@ const ProductsPage = () => {
             </Grid>
           ))}
         </Grid>
+      ) : (
+        <Box>
+          <Typography> No Products found</Typography>
+          <Box
+            component="img"
+            src="https://www.shutterstock.com/image-vector/search-no-result-data-document-260nw-2344073251.jpg"
+            sx={{ width: 300, height: 200, objectFit: "contain" }}
+          />
+        </Box>
       )}
     </Box>
   );

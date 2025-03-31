@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import {
   Box,
@@ -92,7 +93,11 @@ const CartPage = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const activeUser = localStorage.getItem("loggedInUser");
-      setUser(activeUser);
+      if (!activeUser) {
+        router.push("/login");
+      } else {
+        setUser(activeUser);
+      }
 
       if (activeUser) {
         const carts = JSON.parse(localStorage.getItem("carts") || "{}");
@@ -142,8 +147,12 @@ const CartPage = () => {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push("/login");
+  //   }
+  // }, [user]);
 
   return (
     <>

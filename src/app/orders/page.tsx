@@ -1,31 +1,47 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { IProduct } from "@/types/product";
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const OrdersPage = () => {
+  const router = useRouter();
+
   const [orders, setOrders] = useState<{
     [key: string]: { id: string; items: IProduct[] }[];
   }>({});
   const [orderCounts, setOrderCounts] = useState<{
     [key: string]: { [key: string]: number };
   }>({});
+  const [logged, setLogged] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedOrders = JSON.parse(localStorage.getItem("orders") || "{}");
-    const storedOrderCounts = JSON.parse(
-      localStorage.getItem("orderCounts") || "{}"
-    );
+    const loggedUser = localStorage.getItem("loggedInUser") || "";
+    if (!loggedUser) {
+      router.push("/login");
+    } else {
+      // if (logged !== "ganesh@microfox.co") {
+      //   router.push("/my-orders");
+      // } else {
+      setLogged(loggedUser);
 
-    setOrders(storedOrders);
-    setOrderCounts(storedOrderCounts);
+      const storedOrders = JSON.parse(localStorage.getItem("orders") || "{}");
+      const storedOrderCounts = JSON.parse(
+        localStorage.getItem("orderCounts") || "{}"
+      );
+      setOrders(storedOrders);
+      setOrderCounts(storedOrderCounts);
+      // }
+    }
   }, []);
 
   return (
     <Box>
       <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
-        Orders
+        All Orders
       </Typography>
 
       {Object.keys(orders).length === 0 ? (
@@ -36,7 +52,7 @@ const OrdersPage = () => {
         Object.keys(orders).map((userEmail) => (
           <Box key={userEmail} sx={{ mb: 5, p: 3, borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              Orders for : <strong>{userEmail}</strong>
+              Orders from : {userEmail}
             </Typography>
 
             {Array.isArray(orders[userEmail]) ? (
@@ -50,12 +66,12 @@ const OrdersPage = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Typography variant="h6" sx={{ mb: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
                     Order ID: {order.id}
                   </Typography>
 
                   <Grid container spacing={3}>
-                    {Array.isArray(order.items) ? (
+                    {Array.isArray(order.items) &&
                       order.items.map((product) => (
                         <Grid
                           sx={{ xs: 12, sm: 6, md: 4, lg: 3 }}
@@ -101,15 +117,12 @@ const OrdersPage = () => {
                             </CardContent>
                           </Card>
                         </Grid>
-                      ))
-                    ) : (
-                      <Typography>No</Typography>
-                    )}
+                      ))}
                   </Grid>
                 </Box>
               ))
             ) : (
-              <Typography>Not found</Typography>
+              <Typography>Product not found</Typography>
             )}
           </Box>
         ))

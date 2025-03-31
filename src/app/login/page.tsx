@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -49,7 +49,7 @@ const LoginPage = () => {
     }
     localStorage.setItem("loggedInUser", details.email);
     setLoggedInUser(details.email);
-    router.push("/");
+    redirect("/");
 
     reset();
   };
