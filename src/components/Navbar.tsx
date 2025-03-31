@@ -1,21 +1,40 @@
 "use client";
-import { Add, Home } from "@mui/icons-material";
-import { Box, Button } from "@mui/material";
+import { Add, Home, ShoppingCart } from "@mui/icons-material";
+import { Badge, Box, Button, IconButton } from "@mui/material";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const Navbar = () => {
   const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     const user = localStorage.getItem("loggedInUser");
     setLoggedInUser(user);
+    updateCartCount();
   }, []);
+
+  const updateCartCount = () => {
+    const cartCounts = JSON.parse(localStorage.getItem("cartCounts") || "{}");
+    const activeUser = localStorage.getItem("loggedInUser") || "";
+
+    if (activeUser && cartCounts[activeUser]) {
+      const totalCount = Object.values(cartCounts[activeUser]).reduce(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (acc: number, count: any) => acc + count,
+        0
+      );
+      setTotal(totalCount);
+    } else {
+      setTotal(0);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     window.alert("Logged Out Successfully");
     setLoggedInUser(null);
+    setTotal(0);
   };
 
   return (
@@ -29,9 +48,12 @@ const Navbar = () => {
         </Button>
       </Box>
       <Box>
-        <Link href={"/cart"}>
-          <Button>CART</Button>
-        </Link>
+        <IconButton href="/cart">
+          <Badge badgeContent={total} color="error">
+            <ShoppingCart />
+          </Badge>
+        </IconButton>
+
         <Link href={"/orders"}>
           <Button>Orders</Button>
         </Link>
