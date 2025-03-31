@@ -193,7 +193,13 @@ const ProductsPage = () => {
           ))}
         </Grid>
       ) : (
-        <Box sx={{ alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Typography> No Products found</Typography>
           <Box
             component="img"
