@@ -49,9 +49,8 @@ const LoginPage = () => {
     }
     localStorage.setItem("loggedInUser", details.email);
     setLoggedInUser(details.email);
-    redirect("/");
-
     reset();
+    router.push("/");
   };
 
   useEffect(() => {
