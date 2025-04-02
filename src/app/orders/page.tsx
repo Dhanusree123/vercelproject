@@ -23,9 +23,6 @@ const OrdersPage = () => {
     if (!loggedUser) {
       router.push("/login");
     } else {
-      // if (logged !== "ganesh@microfox.co") {
-      //   router.push("/my-orders");
-      // } else {
       setLogged(loggedUser);
 
       const storedOrders = JSON.parse(localStorage.getItem("orders") || "{}");

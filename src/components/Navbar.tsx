@@ -3,7 +3,6 @@
 import { Add, Home, ShoppingCart } from "@mui/icons-material";
 import { Badge, Box, Button, IconButton } from "@mui/material";
 import Link from "next/link";
-// import { useRouter } from "next/router";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -11,7 +10,6 @@ const Navbar = () => {
   const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
 
-  // const router = useRouter();
   const router = useRouter();
 
   const updateCartCount = useCallback(() => {
@@ -52,7 +50,6 @@ const Navbar = () => {
     router.push("/login");
     setLoggedInUser(null);
     setTotal(0);
-    // window.location.reload();
   };
 
   const handleClickOrders = () => {

@@ -53,7 +53,6 @@ const CartPage = () => {
     }
 
     userCounts[id] = (userCounts[id] || 0) + 1;
-    // window.location.reload();
     cartCounts[user] = userCounts;
 
     const productExists = userCart.some((p: IProduct) => p.id === id);
@@ -86,10 +85,8 @@ const CartPage = () => {
 
     if (userCounts[id] && userCounts[id] > 1) {
       userCounts[id] -= 1;
-      // window.location.reload();
     } else {
       delete userCounts[id];
-      // window.location.reload();
     }
     const updatedCart = userCart.filter(
       (p: IProduct) => p.id !== id || userCounts[id]

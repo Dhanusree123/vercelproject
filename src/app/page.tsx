@@ -36,9 +36,7 @@ const ProductsPage = () => {
     if (userCounts[id] && userCounts[id] + 1 === product.stock) {
       toast.warning("Maximum stock reached..!");
     }
-    // window.location.reload();
     userCounts[id] = (userCounts[id] || 0) + 1;
-    // router.refresh();
 
     cartCounts[activeUser] = userCounts;
     const productExists = userCart.some((p: IProduct) => p.id === id);
@@ -70,7 +68,6 @@ const ProductsPage = () => {
 
     if (userCounts[id] && userCounts[id] > 1) {
       userCounts[id] -= 1;
-      // router.refresh();
     } else {
       delete userCounts[id];
     }
@@ -113,12 +110,7 @@ const ProductsPage = () => {
       const cartCounts = JSON.parse(localStorage.getItem("cartCounts") || "{}");
       setProductCount(cartCounts[activeUser] || {});
     }
-    // window.location.reload()
   }, [activeUser]);
-
-  // useEffect(() => {
-  //   window.location.reload();
-  // }, [productCount]);
 
   useEffect(() => {
     const updateCartCounts = () => {
