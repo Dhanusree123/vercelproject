@@ -36,12 +36,13 @@ const Navbar = () => {
       updateCartCount();
     };
     updateUserAndCart();
-    updateUserAndCart();
 
     window.addEventListener("cartUpdated", updateCartCount);
+    window.addEventListener("userLoggedIn", updateUserAndCart);
 
     return () => {
       window.removeEventListener("cartUpdated", updateCartCount);
+      window.removeEventListener("userLoggedIn", updateUserAndCart);
     };
   });
 
@@ -62,19 +63,6 @@ const Navbar = () => {
       router.push("/my-orders");
     }
   };
-
-  // useEffect(() => {
-  //   updateUserAndCart();
-  //   updateCartCount();
-
-  //   window.addEventListener("storage", updateUserAndCart);
-  //   window.addEventListener("cartupdated", updateCartCount);
-
-  //   return () => {
-  //     window.removeEventListener("storage", updateUserAndCart);
-  //     window.removeEventListener("cartUpdated", updateCartCount);
-  //   };
-  // }, [updateUserAndCart, updateCartCount]);
 
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between" }}>

@@ -49,6 +49,9 @@ const LoginPage = () => {
     }
     localStorage.setItem("loggedInUser", details.email);
     setLoggedInUser(details.email);
+
+    window.dispatchEvent(new Event("userLoggedIn"));
+
     reset();
     router.push("/");
   };
