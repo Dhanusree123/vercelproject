@@ -80,4 +80,5 @@ export const placeOrder = () => {
     localStorage.setItem("cartCounts", JSON.stringify(cartCounts));
 
     alert("Order placed successfully!");
+    window.location.reload()
 };

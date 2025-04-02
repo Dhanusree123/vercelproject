@@ -78,7 +78,6 @@ import { Box } from "@mui/material";
 const Test = () => {
   const [emailCount, setEmailCount] = useState<number>(0);
 
-  // Update the count state when the component mounts
   useEffect(() => {
     const savedEmailCount = localStorage.getItem("emailCount");
     if (savedEmailCount) {
@@ -86,17 +85,14 @@ const Test = () => {
     }
   }, []);
 
-  // Function to increase email count and update both state and localStorage
   const increaseEmailCount = () => {
     const newCount = emailCount + 1;
     setEmailCount(newCount);
     localStorage.setItem("emailCount", newCount.toString());
 
-    // Notify other components that the localStorage has changed
     window.dispatchEvent(new Event("emailCountUpdated"));
   };
 
-  // Listen for updates to localStorage across other tabs or components
   useEffect(() => {
     const handleStorageChange = () => {
       const savedEmailCount = localStorage.getItem("emailCount");
@@ -105,10 +101,8 @@ const Test = () => {
       }
     };
 
-    // Add event listener for changes in localStorage
     window.addEventListener("storage", handleStorageChange);
 
-    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };

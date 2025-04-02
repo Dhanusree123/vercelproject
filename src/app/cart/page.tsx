@@ -28,6 +28,14 @@ const CartPage = () => {
 
   const router = useRouter();
 
+  const updateCart = () => {
+    if (!user) return;
+    const carts = JSON.parse(localStorage.getItem("carts") || "{}");
+    const cartCounts = JSON.parse(localStorage.getItem("cartCounts") || "{}");
+    setCartProducts(carts[user] || []);
+    setProductCount(cartCounts[user] || {});
+  };
+
   const handleIncrease = (id: string, product: IProduct) => {
     if (!user) {
       toast.warning("Login to add to cart");
@@ -45,7 +53,7 @@ const CartPage = () => {
     }
 
     userCounts[id] = (userCounts[id] || 0) + 1;
-    window.location.reload();
+    // window.location.reload();
     cartCounts[user] = userCounts;
 
     const productExists = userCart.some((p: IProduct) => p.id === id);
@@ -58,7 +66,10 @@ const CartPage = () => {
     localStorage.setItem("cartCounts", JSON.stringify(cartCounts));
     localStorage.setItem("carts", JSON.stringify(carts));
 
+    window.dispatchEvent(new Event("cartUpdated"));
+
     setProductCount(userCounts);
+    updateCart();
   };
 
   const handleDecrease = (id: string) => {
@@ -75,10 +86,10 @@ const CartPage = () => {
 
     if (userCounts[id] && userCounts[id] > 1) {
       userCounts[id] -= 1;
-      window.location.reload();
+      // window.location.reload();
     } else {
       delete userCounts[id];
-      window.location.reload();
+      // window.location.reload();
     }
     const updatedCart = userCart.filter(
       (p: IProduct) => p.id !== id || userCounts[id]
@@ -88,9 +99,10 @@ const CartPage = () => {
 
     localStorage.setItem("cartCounts", JSON.stringify(cartCounts));
     localStorage.setItem("carts", JSON.stringify(carts));
-
+    window.dispatchEvent(new Event("cartUpdated"));
     setProductCount({ ...userCounts });
     setCartProducts([...userCart]);
+    updateCart();
   };
 
   useEffect(() => {
@@ -100,6 +112,7 @@ const CartPage = () => {
         router.push("/login");
       } else {
         setUser(activeUser);
+        updateCart();
       }
 
       if (activeUser) {
@@ -114,6 +127,9 @@ const CartPage = () => {
         setProductCount(userCounts);
       }
     }
+
+    window.addEventListener("cartUpdated", updateCart);
+    return () => window.removeEventListener("cartUpdated", updateCart);
   }, []);
 
   useEffect(() => {

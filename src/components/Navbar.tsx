@@ -23,20 +23,27 @@ const Navbar = () => {
         (acc: number, count: any) => acc + count,
         0
       );
-      setTotal((prevTotal) =>
-        prevTotal !== totalCount ? totalCount : prevTotal
-      );
+      setTotal(totalCount);
     } else {
       setTotal(0);
     }
   }, []);
 
-  const updateUserAndCart = useCallback(() => {
-    const user = localStorage.getItem("loggedInUser");
-    setLoggedInUser(user);
-    updateCartCount();
-    router.refresh();
-  }, [updateCartCount, router]);
+  useEffect(() => {
+    const updateUserAndCart = () => {
+      const user = localStorage.getItem("loggedInUser");
+      setLoggedInUser(user);
+      updateCartCount();
+    };
+    updateUserAndCart();
+    updateUserAndCart();
+
+    window.addEventListener("cartUpdated", updateCartCount);
+
+    return () => {
+      window.removeEventListener("cartUpdated", updateCartCount);
+    };
+  });
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
@@ -44,7 +51,7 @@ const Navbar = () => {
     router.push("/login");
     setLoggedInUser(null);
     setTotal(0);
-    window.location.reload();
+    // window.location.reload();
   };
 
   const handleClickOrders = () => {
@@ -56,18 +63,18 @@ const Navbar = () => {
     }
   };
 
-  useEffect(() => {
-    updateUserAndCart();
-    updateCartCount();
+  // useEffect(() => {
+  //   updateUserAndCart();
+  //   updateCartCount();
 
-    window.addEventListener("storage", updateUserAndCart);
-    window.addEventListener("cartupdated", updateCartCount);
+  //   window.addEventListener("storage", updateUserAndCart);
+  //   window.addEventListener("cartupdated", updateCartCount);
 
-    return () => {
-      window.removeEventListener("storage", updateUserAndCart);
-      window.removeEventListener("cartUpdated", updateCartCount);
-    };
-  }, [updateUserAndCart, updateCartCount]);
+  //   return () => {
+  //     window.removeEventListener("storage", updateUserAndCart);
+  //     window.removeEventListener("cartUpdated", updateCartCount);
+  //   };
+  // }, [updateUserAndCart, updateCartCount]);
 
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between" }}>

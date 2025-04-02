@@ -26,6 +26,7 @@ const ProductsPage = () => {
   const [activeUser, setActiveUser] = useState<string>("");
 
   const handleIncrease = (id: string, product: IProduct) => {
+    if (!activeUser) return;
     const carts = JSON.parse(localStorage.getItem("carts") || "{}");
     const userCart = carts[activeUser] || [];
 
@@ -37,7 +38,7 @@ const ProductsPage = () => {
     }
     // window.location.reload();
     userCounts[id] = (userCounts[id] || 0) + 1;
-    router.refresh();
+    // router.refresh();
 
     cartCounts[activeUser] = userCounts;
     const productExists = userCart.some((p: IProduct) => p.id === id);
@@ -69,7 +70,7 @@ const ProductsPage = () => {
 
     if (userCounts[id] && userCounts[id] > 1) {
       userCounts[id] -= 1;
-      router.refresh();
+      // router.refresh();
     } else {
       delete userCounts[id];
     }
@@ -77,8 +78,8 @@ const ProductsPage = () => {
       (p: IProduct) => p.id !== id || userCounts[id]
     );
     carts[activeUser] = updatedCart;
-
     cartCounts[activeUser] = userCounts;
+
     localStorage.setItem("cartCounts", JSON.stringify(cartCounts));
     localStorage.setItem("carts", JSON.stringify(carts));
 
@@ -118,6 +119,19 @@ const ProductsPage = () => {
   // useEffect(() => {
   //   window.location.reload();
   // }, [productCount]);
+
+  useEffect(() => {
+    const updateCartCounts = () => {
+      if (!activeUser) return;
+      const cartCounts = JSON.parse(localStorage.getItem("cartCounts") || "{}");
+      setProductCount(cartCounts[activeUser] || {});
+    };
+
+    window.addEventListener("cartUpdated", updateCartCounts);
+
+    return () => window.removeEventListener("cartUpdated", updateCartCounts);
+  }, [activeUser]);
+
   return (
     <Box>
       <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
